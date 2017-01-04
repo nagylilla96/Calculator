@@ -1,6 +1,7 @@
 data segment para public 'data'
 	value dw 0
 	value1 dw 0	
+	i dw 0
 data ends
 
 code segment para public 'code'
@@ -115,11 +116,15 @@ moredelay:
 	
 	mov value, 0
 
+read:
 	mov ah, 7
 	int 21h
 	mov dl, al
 	mov ah,2
 	int 21h
+	inc i
+	cmp i, 20
+	jl read
 	
 delay5:
 	nop
