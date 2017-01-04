@@ -11,6 +11,8 @@ data segment para public 'data'
 	lgtext5 equ $-text5
 	text6 db "6. Squareroot"
 	lgtext6 equ $-text6
+	errortxt db "The introduced number is not correct"
+	lgerror equ $-errortxt
 	value dw 0
 	value1 dw 0	
 	value2 dw 0
@@ -119,15 +121,41 @@ write6:
 	cmp si, value2
 	jl write6
 	
-;read:
-;	mov ah, 7
-;	int 21h
-;	mov dl, al
-;	mov ah,2
-;	int 21h
-;	inc i
-;	cmp i, 20
-;	jl read
+	mov dl, 10 ;new line
+	mov ah, 2
+	int 21h	
+	
+read:
+	mov ah, 7
+	int 21h
+	mov dl, al
+	mov ah,2
+	int 21h
+	cmp i, 1
+	je condition
+	inc i
+	cmp i, 2
+	jl read
+	
+condition:
+	cmp al, 13
+	je delay5
+	jne error
+	
+	
+error: 
+	mov dl, 10 ;new line
+	mov ah, 2
+	int 21h	
+	mov si, 0
+	mov value2, lgerror	
+errorloop:
+	mov dl, errortxt[si]
+	mov ah, 2
+	int 21h
+	add si, 1
+	cmp si, value2
+	jl errorloop
 	
 delay5:
 	nop
