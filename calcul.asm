@@ -17,7 +17,11 @@ data segment para public 'data'
 	value dw 0
 	value1 dw 0	
 	value2 dw 0
-	float dd 3.45678
+	float db 15 dup(?)
+	lgfloat dw 0
+	number dd 1
+	negat db 0
+	real db 0
 	i dw 0
 data ends
 
@@ -31,8 +35,8 @@ assume cs:code, ds:data
 	MOV AX, DATA
 	MOV DS, AX
 	finit 
-	fld float
-	fwait
+	;fld float
+	;fwait
 	mov	AX, 0004h
 	;int 10h
 	;mov	AX, 0C03h
@@ -167,6 +171,53 @@ errorloop:
 	jl errorloop
 	
 addition:
+	nop
+	
+	mov dl, 10 ;new line
+	mov ah, 2
+	int 21h	
+	mov si, 0
+	
+readfloat:
+	mov ah, 7
+	int 21h
+	mov dl, al
+	mov ah,2
+	int 21h
+	cmp al, 13
+	je workfloat ;if a carriage return appears, we want to work with the float	
+	mov float[si], al	
+	inc si
+	inc lgfloat
+	cmp si, 15 ;if the input is bigger than 15 characters, it gives the error of incorrect number
+	jg error
+	cmp al, 13
+	jne readfloat	
+	
+	
+workfloat:
+	jmp isinteger
+	cmp float[0], 2Dh
+	je negative
+	jne positive
+	
+isinteger:
+	mov si, 0
+finddot: 
+	cmp float[si], 2Eh
+	je isreal
+	inc si
+	cmp si, lgfloat
+	jg isnotreal
+	jng finddot
+isreal:
+	mov real, 1
+isnotreal:
+	nop
+	
+negative:
+	nop
+positive:
 	nop
 	
 delay5:
