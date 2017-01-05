@@ -13,6 +13,7 @@ data segment para public 'data'
 	lgtext6 equ $-text6
 	errortxt db "The introduced number is not correct"
 	lgerror equ $-errortxt
+	ui1 db 2
 	value dw 0
 	value1 dw 0	
 	value2 dw 0
@@ -125,22 +126,30 @@ write6:
 	mov ah, 2
 	int 21h	
 	
+	mov si, 0
+	
 read:
 	mov ah, 7
 	int 21h
 	mov dl, al
 	mov ah,2
 	int 21h
-	cmp i, 1
+	mov ui1[si], al
+	cmp si, 1
 	je condition
-	inc i
-	cmp i, 2
+	inc si
+	cmp si, 2
 	jl read
 	
 condition:
 	cmp al, 13
-	je delay5
+	je check1
 	jne error
+	
+check1:
+	cmp ui1[0], 31h
+	je addition
+	jne delay5
 	
 	
 error: 
@@ -156,6 +165,9 @@ errorloop:
 	add si, 1
 	cmp si, value2
 	jl errorloop
+	
+addition:
+	nop
 	
 delay5:
 	nop
