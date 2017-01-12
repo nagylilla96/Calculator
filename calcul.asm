@@ -19,9 +19,12 @@ data segment para public 'data'
 	value2 dw 0
 	float db 15 dup(?)
 	lgfloat dw 0
-	number dd 1
+	number dw 1
 	negat db 0
 	real db 0
+	realpart db 15 dup(?)
+	fractpart db 15 dup(?)
+	basenumber dw 0
 	i dw 0
 data ends
 
@@ -35,8 +38,6 @@ assume cs:code, ds:data
 	MOV AX, DATA
 	MOV DS, AX
 	finit 
-	;fld float
-	;fwait
 	mov	AX, 0004h
 	;int 10h
 	;mov	AX, 0C03h
@@ -153,7 +154,7 @@ condition:
 check1:
 	cmp ui1[0], 31h
 	je addition
-	jne delay5
+	jne readfloat
 	
 	
 error: 
@@ -194,31 +195,63 @@ readfloat:
 	cmp al, 13
 	jne readfloat	
 	
+	;fld
 	
 workfloat:
-	jmp isinteger
 	cmp float[0], 2Dh
 	je negative
 	jne positive
 	
+	
 isinteger:
 	mov si, 0
+	mov di, 0
 finddot: 
 	cmp float[si], 2Eh
 	je isreal
+	cmp si, 0
+	je deleteminus	
+	mov cl, float[si]
+	mov realpart[di], cl	
+	mov di, si
+	
+contdot:
 	inc si
 	cmp si, lgfloat
 	jg isnotreal
 	jng finddot
 isreal:
 	mov real, 1
+	mov di, 0
+	inc si
+fractloop:
+	mov cl, float[si]
+	mov fractpart[di], cl
+	cmp si, lgfloat
+	je delay5
+	inc si
+	inc di
+	jmp fractloop
+	jmp delay5
+	
+deleteminus:
+	mov di, si
+	cmp negat, 1
+	je changesi
+	jmp contdot	
+	inc si
+changesi:	
+	jmp contdot
+	
 isnotreal:
-	nop
+	mov real, 0
 	
 negative:
-	nop
+	mov negat, 1
+	jmp isinteger
 positive:
-	nop
+	mov negat, 0
+	jmp	isinteger
 	
 delay5:
 	nop
@@ -231,6 +264,8 @@ moredelay1:
 	jl moredelay1
 	cmp value, 2500
 	jl delay5
+	
+	fwait
 	
 	ret
 	
