@@ -25,3 +25,53 @@ checknr macro nr
 	cmp nr, 39h
 	jnle error1
 endm
+
+processreal macro realpart
+local procloop
+	push ax
+	push bx
+	push cx
+	push dx
+procloop:
+	mov bx, 0	
+	checknr realpart[si]
+	sub realpart[si], 30h
+	mov bl, realpart[si]
+	mov floatnumber, bx
+	fild floatnumber
+	fmul ST(0), ST(3)
+	fld ten
+	fmulp ST(4)
+	fadd 
+	dec si
+	loop procloop
+	pop dx
+	pop cx
+	pop bx
+	pop ax
+endm
+
+processfloat macro floatpart
+local flloop
+	push ax
+	push bx
+	push cx
+	push dx
+flloop:
+	mov bx, 0
+	checknr fractpart[si]
+	sub fractpart[si], 30h
+	mov bl, fractpart[si]
+	mov floatnumber, bx
+	fild floatnumber
+	fmul ST(0), ST(3)
+	fld ten
+	fdivp ST(4), ST(0)
+	fadd
+	inc si
+	loop flloop
+	pop dx
+	pop cx
+	pop bx
+	pop ax
+endm

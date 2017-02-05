@@ -31,9 +31,9 @@ data segment para public 'data'
 	negat db 0
 	real db 0
 	realpart db 15 dup(?)
-	lgreal dw 0
+	lgreal db 0
 	fractpart db 15 dup(?)
-	lgfract dw 0
+	lgfract db 0
 	basenumber dw 0
 	mulnumber dd 0.0
 	floatnumber dw 0
@@ -92,8 +92,7 @@ condition:
 check1:
 	cmp ui1[0], 31h
 	je addition
-	jne readfloat
-	
+	jne readfloat	
 	
 error: 
 	call newline
@@ -182,58 +181,34 @@ positive:
 	jmp	isinteger
 	
 	finit
-	jmp processnr
-
+	mov cx, 0
+	
 processnr:
-	mov cx, lgreal
+	mov cl, lgreal
 	mov si, cx
 	dec si
 	fld one
 	fld one
 	fld result
-processreal:
-	mov bx, 0	
-	checknr realpart[si]
-	sub realpart[si], 30h
-	mov bl, realpart[si]
-	mov floatnumber, bx
-	fild floatnumber
-	fmul ST(0), ST(3)
-	fld ten
-	fmulp ST(4)
-	fadd 
-	dec si
-	loop processreal
-	mov si, 0
-	mov cx, lgfract
-	fld result
-	fld ten
-	fdivp ST(3), ST(0)
-processfloat:
-	mov bx, 0
-	checknr fractpart[si]
-	sub fractpart[si], 30h
-	mov bl, fractpart[si]
-	mov floatnumber, bx
-	fild floatnumber
-	fmul ST(0), ST(3)
-	fld ten
-	fdivp ST(4), ST(0)
-	fadd
-	inc si
-	loop processfloat
-	fadd
-	ffree st(2)
-	ffree st(1)
-	
-	jmp beforedelay
-	
+	processreal realpart
+	jmp nextlabel
 error1:
 	call newline
 	write errortxt, lgerror
-	jmp delay5	
+	jmp delay5
+nextlabel:
+	mov si, 0
+	mov cl, lgfract
+	fld result
+	fld ten
+	fdivp ST(3), ST(0)
+	processfloat fractpart
+	fadd	
+	jmp beforedelay
 	
 beforedelay:
+	ffree st(2)
+	ffree st(1)
 delay5:
 	nop
 	inc value
