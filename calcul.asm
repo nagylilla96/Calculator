@@ -32,6 +32,7 @@ data segment para public 'data'
 	i dw 0
 data ends
 
+extrn newline:far
 code segment para public 'code'
 	
 start proc far
@@ -89,25 +90,13 @@ check1:
 	
 	
 error: 
-	mov dl, 10 ;new line
-	mov ah, 2
-	int 21h	
-	mov si, 0
-	mov value2, lgerror	
-errorloop:
-	mov dl, errortxt[si]
-	mov ah, 2
-	int 21h
-	add si, 1
-	cmp si, value2
-	jl errorloop
-	
+	call newline
+	write errortxt, lgerror	
+
 addition:
 	nop
 	
-	mov dl, 10 ;new line
-	mov ah, 2
-	int 21h	
+	call newline
 	mov si, 0	
 	
 readfloat:
@@ -131,8 +120,7 @@ readfloat:
 workfloat:
 	cmp float[0], 2Dh
 	je negative
-	jne positive
-	
+	jne positive	
 	
 isinteger:
 	mov si, 0
@@ -140,8 +128,8 @@ isinteger:
 finddot: 
 	cmp float[si], 2Eh
 	je isreal
-	cmp si, 0
-	je deleteminus	
+	cmp negat, 1
+	je deleteminus
 	mov cl, float[si]
 	mov realpart[di], cl	
 	mov di, si
@@ -167,11 +155,11 @@ fractloop:
 	
 deleteminus:
 	mov di, si
-	cmp negat, 1
+	cmp si, 0
 	je changesi
-	jmp contdot	
-	inc si
-changesi:	
+	jne contdot
+changesi:
+	inc si	
 	jmp contdot
 	
 isnotreal:

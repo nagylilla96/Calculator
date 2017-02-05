@@ -18,13 +18,3 @@ writeloop:
 	pop bx
 	pop ax
 endm
-
-newline macro
-	push ax
-	push dx
-	mov dl, 10 ;new line
-	mov ah, 2
-	int 21h	
-	pop dx
-	pop ax
-endm
