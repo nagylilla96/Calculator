@@ -18,3 +18,10 @@ writeloop:
 	pop bx
 	pop ax
 endm
+
+checknr macro nr
+	cmp nr, 30h
+	jnge error1
+	cmp nr, 39h
+	jnle error1
+endm

@@ -194,26 +194,25 @@ processnr:
 	mov si, cx
 	dec si
 	fld one
+	fld one
 	fld ten
 	fld result
 processreal:
-	mov bx, 0
-checknr1:	
-	cmp realpart[si], 30h
-	jnge error1
-	cmp realpart[si], 39h
-	jnle error1
+	mov bx, 0	
+	checknr realpart[si]
 	sub realpart[si], 30h
 	mov bl, realpart[si]
 	mov floatnumber, bx
 	fild floatnumber
-	fmul ST(0), ST(3)
+	fmul ST(0), ST(4)
 	fld ten
-	fmulp ST(4)
+	fmulp ST(5)
 	fadd 
 	dec si
 	loop processreal
+	mov si, 0
 processfloat:
+	
 	
 delay5:
 	nop
