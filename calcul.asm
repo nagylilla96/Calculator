@@ -1,3 +1,7 @@
+if 1 
+	include MACROS.MAC
+endif
+
 data segment para public 'data'
 	text1 db "1. Addition"
 	lgtext1 equ $-text1
@@ -29,7 +33,7 @@ data segment para public 'data'
 data ends
 
 code segment para public 'code'
-
+	
 start proc far
 assume cs:code, ds:data
 	PUSH DS
@@ -45,92 +49,19 @@ assume cs:code, ds:data
 	;mov	CX, 0064h	; 50 in hex
 	;mov	DX, 0064h	; 100 in hex
 	int 10h
-	mov bx, 0h
-	mov si, 0	
-	mov value2, lgtext1
-	
-write1: ; write the first string (and so on)
-	mov dl, text1[si]
-	mov ah, 2
-	int 21h
-	add si, 1
-	cmp si, value2
-	jl write1
 
-	mov dl, 10 ;new line
-	mov ah, 2
-	int 21h	
-	mov si, 0
-	mov value2, lgtext2
-	
-write2: 
-	mov dl, text2[si]
-	mov ah, 2
-	int 21h
-	add si, 1
-	cmp si, value2
-	jl write2
-	
-	mov dl, 10 ;new line
-	mov ah, 2
-	int 21h	
-	mov si, 0
-	mov value2, lgtext3
-	
-write3: 
-	mov dl, text3[si]
-	mov ah, 2
-	int 21h
-	add si, 1
-	cmp si, value2
-	jl write3
-	
-	mov dl, 10 ;new line
-	mov ah, 2
-	int 21h	
-	mov si, 0
-	mov value2, lgtext4
-	
-write4: 
-	mov dl, text4[si]
-	mov ah, 2
-	int 21h
-	add si, 1
-	cmp si, value2
-	jl write4
-	
-	mov dl, 10 ;new line
-	mov ah, 2
-	int 21h	
-	mov si, 0
-	mov value2, lgtext5
-	
-write5: 
-	mov dl, text5[si]
-	mov ah, 2
-	int 21h
-	add si, 1
-	cmp si, value2
-	jl write5
-	
-	mov dl, 10 ;new line
-	mov ah, 2
-	int 21h	
-	mov si, 0
-	mov value2, lgtext6
-	
-write6: 
-	mov dl, text6[si]
-	mov ah, 2
-	int 21h
-	add si, 1
-	cmp si, value2
-	jl write6
-	
-	mov dl, 10 ;new line
-	mov ah, 2
-	int 21h	
-	
+	write text1, lgtext1
+	call newline
+	write text2, lgtext2
+	call newline
+	write text3, lgtext3
+	call newline
+	write text4, lgtext4
+	call newline
+	write text5, lgtext5
+	call newline
+	write text6, lgtext6
+	call newline
 	mov si, 0
 	
 read:
@@ -177,7 +108,7 @@ addition:
 	mov dl, 10 ;new line
 	mov ah, 2
 	int 21h	
-	mov si, 0
+	mov si, 0	
 	
 readfloat:
 	mov ah, 7

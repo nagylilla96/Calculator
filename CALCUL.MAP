@@ -1,1 +1,9 @@
-d:\calcul.obj : unable to open file
+
+ Start  Stop   Length Name               Class
+
+ 00000H 000ACH 000ADH DATA               DATA
+ 000B0H 00294H 001E5H CODE               CODE
+
+Program entry point at 000B:0000
+Warning: no stack
+
