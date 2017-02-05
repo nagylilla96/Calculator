@@ -184,18 +184,12 @@ positive:
 	finit
 	jmp processnr
 
-error1:
-	call newline
-	write errortxt, lgerror
-	jmp delay5
-	
 processnr:
 	mov cx, lgreal
 	mov si, cx
 	dec si
 	fld one
 	fld one
-	fld ten
 	fld result
 processreal:
 	mov bx, 0	
@@ -204,16 +198,42 @@ processreal:
 	mov bl, realpart[si]
 	mov floatnumber, bx
 	fild floatnumber
-	fmul ST(0), ST(4)
+	fmul ST(0), ST(3)
 	fld ten
-	fmulp ST(5)
+	fmulp ST(4)
 	fadd 
 	dec si
 	loop processreal
 	mov si, 0
+	mov cx, lgfract
+	fld result
+	fld ten
+	fdivp ST(3), ST(0)
 processfloat:
+	mov bx, 0
+	checknr fractpart[si]
+	sub fractpart[si], 30h
+	mov bl, fractpart[si]
+	mov floatnumber, bx
+	fild floatnumber
+	fmul ST(0), ST(3)
+	fld ten
+	fdivp ST(4), ST(0)
+	fadd
+	inc si
+	loop processfloat
+	fadd
+	ffree st(2)
+	ffree st(1)
 	
+	jmp beforedelay
 	
+error1:
+	call newline
+	write errortxt, lgerror
+	jmp delay5	
+	
+beforedelay:
 delay5:
 	nop
 	inc value
