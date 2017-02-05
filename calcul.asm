@@ -2,6 +2,8 @@ if 1
 	include MACROS.MAC
 endif
 
+;;TODO comment it!!!
+
 data segment para public 'data'
 	text1 db "1. Addition"
 	lgtext1 equ $-text1
@@ -27,8 +29,13 @@ data segment para public 'data'
 	negat db 0
 	real db 0
 	realpart db 15 dup(?)
+	lgreal dw 0
 	fractpart db 15 dup(?)
+	lgfract dw 0
 	basenumber dw 0
+	mulnumber dd 0.0
+	floatnumber dw 0
+	one dd 1.0
 	i dw 0
 data ends
 
@@ -44,11 +51,6 @@ assume cs:code, ds:data
 	MOV DS, AX
 	finit 
 	mov	AX, 0004h
-	;int 10h
-	;mov	AX, 0C03h
-	;xor	BX, BX
-	;mov	CX, 0064h	; 50 in hex
-	;mov	DX, 0064h	; 100 in hex
 	int 10h
 
 	write text1, lgtext1
@@ -110,12 +112,10 @@ readfloat:
 	mov float[si], al	
 	inc si
 	inc lgfloat
-	cmp si, 15 ;if the input is bigger than 15 characters, it gives the error of incorrect number
+	cmp si, 10 ;if the input is bigger than 10 characters (max unsigned nr repr. on 32 bits is  4,294,967,295), it gives the error of incorrect number
 	jg error
 	cmp al, 13
 	jne readfloat	
-	
-	;fld
 	
 workfloat:
 	cmp float[0], 2Dh
@@ -132,6 +132,7 @@ finddot:
 	je deleteminus
 	mov cl, float[si]
 	mov realpart[di], cl	
+	inc lgreal
 	mov di, si
 	
 contdot:
@@ -145,16 +146,17 @@ isreal:
 	inc si
 fractloop:
 	mov cl, float[si]
-	mov fractpart[di], cl
 	cmp si, lgfloat
-	je delay5
+	je processnr
+	mov fractpart[di], cl
+	inc lgfract	
 	inc si
 	inc di
 	jmp fractloop
-	jmp delay5
+	jmp processnr
 	
 deleteminus:
-	mov di, si
+	mov di, si	
 	cmp si, 0
 	je changesi
 	jne contdot
@@ -171,6 +173,34 @@ negative:
 positive:
 	mov negat, 0
 	jmp	isinteger
+	
+	finit
+	jmp processnr
+
+error1:
+	call newline
+	write errortxt, lgerror
+	jmp delay5
+	
+processnr:
+	mov cx, lgreal
+	mov si, cx
+	dec si
+	fld mulnumber
+	fadd one
+processreal:
+	mov bx, 0
+checknr1:
+	cmp realpart[si], 30h
+	jnge error1
+	cmp realpart[si], 39h
+	jnle error1
+	sub realpart[si], 30h
+	mov bl, realpart[si]
+	mov floatnumber, bx
+	fild floatnumber
+	fmul
+processfloat:
 	
 delay5:
 	nop
@@ -191,3 +221,4 @@ moredelay1:
 start endp
 code ends
 end start
+end start	

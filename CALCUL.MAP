@@ -1,10 +1,10 @@
 
  Start  Stop   Length Name               Class
 
- 00000H 000ACH 000ADH DATA               DATA
- 000B0H 0028AH 001DBH CODE               CODE
- 00290H 00296H 00007H CODE               CODE
+ 00000H 000BAH 000BBH DATA               DATA
+ 000C0H 00303H 00244H CODE               CODE
+ 00310H 00316H 00007H CODE               CODE
 
-Program entry point at 000B:0000
+Program entry point at 000C:0000
 Warning: no stack
 
