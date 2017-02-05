@@ -3,6 +3,8 @@ if 1
 endif
 
 ;;TODO comment it!!!
+;;TODO check why it enters an infinite loop when you enter / instead of .
+;;TODO add some response when user enters a number because it's not obvious! (ex: add operation chosen or smth like that)
 
 data segment para public 'data'
 	text1 db "1. Addition"
@@ -36,6 +38,8 @@ data segment para public 'data'
 	mulnumber dd 0.0
 	floatnumber dw 0
 	one dd 1.0
+	ten dd 10.0
+	result dd 0
 	i dw 0
 data ends
 
@@ -137,6 +141,7 @@ finddot:
 	
 contdot:
 	inc si
+	inc di
 	cmp si, lgfloat
 	jg isnotreal
 	jng finddot
@@ -165,7 +170,9 @@ changesi:
 	jmp contdot
 	
 isnotreal:
+	dec lgreal
 	mov real, 0
+	jmp processnr
 	
 negative:
 	mov negat, 1
@@ -186,11 +193,12 @@ processnr:
 	mov cx, lgreal
 	mov si, cx
 	dec si
-	fld mulnumber
-	fadd one
+	fld one
+	fld ten
+	fld result
 processreal:
 	mov bx, 0
-checknr1:
+checknr1:	
 	cmp realpart[si], 30h
 	jnge error1
 	cmp realpart[si], 39h
@@ -199,7 +207,12 @@ checknr1:
 	mov bl, realpart[si]
 	mov floatnumber, bx
 	fild floatnumber
-	fmul
+	fmul ST(0), ST(3)
+	fld ten
+	fmulp ST(4)
+	fadd 
+	dec si
+	loop processreal
 processfloat:
 	
 delay5:
