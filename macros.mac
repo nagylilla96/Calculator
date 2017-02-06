@@ -55,8 +55,9 @@ processfloat macro floatpart
 local flloop
 	push ax
 	push bx
-	push cx
-	push dx
+	push dx	
+	cmp cx, 0
+	je contproc
 flloop:
 	mov bx, 0
 	checknr fractpart[si]
@@ -71,7 +72,6 @@ flloop:
 	inc si
 	loop flloop
 	pop dx
-	pop cx
 	pop bx
 	pop ax
 endm

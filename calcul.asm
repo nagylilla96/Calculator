@@ -102,7 +102,8 @@ addition:
 	nop
 	
 	call newline
-	mov si, 0	
+	mov si, 0
+
 	
 readfloat:
 	mov ah, 7
@@ -118,13 +119,11 @@ readfloat:
 	cmp si, 10 ;if the input is bigger than 10 characters (max unsigned nr repr. on 32 bits is  4,294,967,295), it gives the error of incorrect number
 	jg error
 	cmp al, 13
-	jne readfloat	
-	
+	jne readfloat		
 workfloat:
 	cmp float[0], 2Dh
 	je negative
-	jne positive	
-	
+	jne positive		
 isinteger:
 	mov si, 0
 	mov di, 0
@@ -133,11 +132,10 @@ finddot:
 	je isreal
 	cmp negat, 1
 	je deleteminus
+contfind:
 	mov cl, float[si]
 	mov realpart[di], cl	
-	inc lgreal
-	mov di, si
-	
+	inc lgreal	
 contdot:
 	inc si
 	inc di
@@ -157,22 +155,17 @@ fractloop:
 	inc si
 	inc di
 	jmp fractloop
-	jmp processnr
-	
-deleteminus:
+	jmp processnr	
+deleteminus:	
+	cmp di, 0
+	jne contfind
 	mov di, si	
-	cmp si, 0
-	je changesi
-	jne contdot
-changesi:
 	inc si	
-	jmp contdot
-	
+	jmp contfind
 isnotreal:
 	dec lgreal
 	mov real, 0
-	jmp processnr
-	
+	jmp processnr	
 negative:
 	mov negat, 1
 	jmp isinteger
@@ -180,6 +173,12 @@ positive:
 	mov negat, 0
 	jmp	isinteger
 	
+	cmp negat,1
+	je decrease
+	jne nodecrease
+decrease:
+	dec lgreal
+nodecrease:
 	finit
 	mov cx, 0
 	
@@ -203,10 +202,17 @@ nextlabel:
 	fld ten
 	fdivp ST(3), ST(0)
 	processfloat fractpart
-	fadd	
-	jmp beforedelay
+contproc:
+	fadd
 	
 beforedelay:
+	cmp negat, 1
+	je invert
+	jne noinvert
+invert:
+	fld result
+	fsubrp st(1), st(0)
+noinvert:
 	ffree st(2)
 	ffree st(1)
 delay5:
@@ -228,4 +234,3 @@ moredelay1:
 start endp
 code ends
 end start
-end start	
