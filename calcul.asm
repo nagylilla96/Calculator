@@ -39,6 +39,7 @@ data segment para public 'data'
 	one dd 1.0
 	ten dd 10.0
 	result dd 0
+	zero dd 0
 	addi db 0
 	subt db 0
 	mult db 0
@@ -257,7 +258,10 @@ positive:
 	mov negat, 0
 	jmp	isinteger
 contttt:
+	cmp real, 0
+	jne continue
 	dec lgreal
+continue:
 	mov cx, 0
 	jmp processnr
 	
@@ -329,6 +333,8 @@ resultadd:
 	fadd
 	jmp delay5
 resultsub:
+	fld st(1)
+	ffree st(2)
 	fsub
 	jmp delay5
 resultmul:
@@ -337,21 +343,27 @@ resultmul:
 resultdiv:
 	fld st(1)
 	ffree st(2)
-	fcom result 
-	je divbyzero
+	fld st(0)
+	fstp result
+	
+	;je divbyzero
 	fdiv
 	jmp delay5
 resultsqu:	
+	fld st(1)
+	ffree st(2)
 	fld st(0)
 	fmul
 	jmp delay5
 resultsqr:
+	fld st(1)
+	ffree st(2)
 	fsqrt
 	jmp delay5
 
-divbyzero:
-	call newline
-	write divbyzerotxt, lgdivbyzero
+;divbyzero:
+	;call newline
+	;write divbyzerotxt, lgdivbyzero
 	;fld st(0)
 	;frndint
 delay5:
