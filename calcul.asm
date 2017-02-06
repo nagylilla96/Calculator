@@ -191,13 +191,13 @@ isreal:
 fractloop:
 	mov cl, float[si]
 	cmp si, lgfloat
-	je processnr
+	je contttt
 	mov fractpart[di], cl
 	inc lgfract	
 	inc si
 	inc di
 	jmp fractloop
-	jmp processnr	
+	jmp contttt	
 deleteminus:	
 	cmp di, 0
 	jne contfind
@@ -205,24 +205,19 @@ deleteminus:
 	inc si	
 	jmp contfind
 isnotreal:
-	dec lgreal
+	;dec lgreal
 	mov real, 0
 	mov fractpart[0], 30h ;; we need this, othewise: divide by zero
 	mov lgfract, 1
-	jmp processnr	
+	jmp contttt	
 negative:
 	mov negat, 1
 	jmp isinteger
 positive:
 	mov negat, 0
 	jmp	isinteger
-	
-	cmp negat,1
-	je decrease
-	jne nodecrease
-decrease:
+contttt:
 	dec lgreal
-nodecrease:
 	finit
 	mov cx, 0
 	
