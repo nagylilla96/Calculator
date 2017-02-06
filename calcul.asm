@@ -342,12 +342,15 @@ resultmul:
 	jmp delay5
 resultdiv:
 	fld st(1)
-	ffree st(2)
-	fld st(0)
-	fstp result
-	
-	;je divbyzero
-	fdiv
+	ffree st(2)	
+	fdiv	
+	fcom zero
+	mov floatnumber, 0
+	fstsw floatnumber
+	cmp floatnumber, 2084
+	je divbyzero
+	fwait	
+	sahf	
 	jmp delay5
 resultsqu:	
 	fld st(1)
@@ -360,12 +363,14 @@ resultsqr:
 	ffree st(2)
 	fsqrt
 	jmp delay5
+	
 
-;divbyzero:
-	;call newline
-	;write divbyzerotxt, lgdivbyzero
+divbyzero:
+	call newline
+	write divbyzerotxt, lgdivbyzero
 	;fld st(0)
 	;frndint
+	;fstp result
 delay5:
 	nop
 	inc value
