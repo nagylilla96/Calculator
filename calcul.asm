@@ -21,6 +21,8 @@ data segment para public 'data'
 	lgtext6 equ $-text6
 	errortxt db "The introduced number is not correct"
 	lgerror equ $-errortxt
+	divbyzerotxt db "Division by zero"
+	lgdivbyzero equ $-divbyzerotxt
 	ui1 db 2 ;;menu option number
 	value dw 0 ;;used for delay
 	value1 dw 0 ;;used for delay
@@ -143,9 +145,47 @@ error:
 	write errortxt, lgerror	
 	jmp delay5
 	
-startread:
+compare:
+	mov lgfloat, 0
+	mov lgreal, 0
+	mov lgfract, 0
 	call newline
 	mov si, 0
+	cmp addi, 1
+	je incadd
+	jne skip
+incadd:
+	inc addi
+	jmp readfloat
+laberror:
+	jmp error
+skip:
+	cmp subt, 1
+	je incsub
+	jne skip1
+incsub:
+	inc subt
+	jmp readfloat
+skip1:
+	cmp divi, 1
+	je incdiv
+	jne skip2
+incdiv:
+	inc divi
+	jmp readfloat
+skip2:
+	cmp mult, 1
+	je incmult
+	jne readfloat
+incmult:
+	inc mult
+	
+startread:
+	mov lgfloat, 0
+	mov lgreal, 0
+	mov lgfract, 0
+	call newline
+	mov si, 0		
 	
 readfloat:
 	mov ah, 7
@@ -159,7 +199,7 @@ readfloat:
 	inc si
 	inc lgfloat
 	cmp si, 10 ;if the input is bigger than 10 characters (max unsigned nr repr. on 32 bits is  4,294,967,295), it gives the error of incorrect number
-	jg error
+	jg laberror
 	cmp al, 13
 	jne readfloat		
 workfloat:
@@ -218,8 +258,11 @@ positive:
 	jmp	isinteger
 contttt:
 	dec lgreal
-	finit
 	mov cx, 0
+	jmp processnr
+	
+label2:
+	jmp compare
 	
 processnr:
 	mov cl, lgreal
@@ -234,6 +277,8 @@ error1:
 	call newline
 	write errortxt, lgerror
 	jmp delay5
+label1:
+	jmp label2
 nextlabel:
 	mov si, 0
 	mov cl, lgfract
@@ -243,6 +288,9 @@ nextlabel:
 	processfloat fractpart
 contproc:
 	fadd
+	jmp beforedelay
+label0:
+	jmp label1
 	
 beforedelay:
 	cmp negat, 1
@@ -253,8 +301,59 @@ invert:
 noinvert:
 	ffree st(2)
 	ffree st(1)
+	
+	cmp addi, 1
+	je label0
+	cmp subt, 1
+	je label0
+	cmp mult, 1
+	je label0
+	cmp divi, 1
+	je label0
+	fld st(3)
+	ffree st(4)
+	cmp addi, 2
+	je resultadd
+	cmp subt, 2
+	je resultsub
+	cmp mult, 2
+	je resultmul
+	cmp divi, 2
+	je resultdiv
+	cmp squa, 1
+	je resultsqu
+	cmp squar, 1
+	je resultsqr
+
+resultadd:
+	fadd
+	jmp delay5
+resultsub:
+	fsub
+	jmp delay5
+resultmul:
+	fmul
+	jmp delay5
+resultdiv:
+	fld st(1)
+	ffree st(2)
+	fcom result 
+	je divbyzero
+	fdiv
+	jmp delay5
+resultsqu:	
 	fld st(0)
-	frndint
+	fmul
+	jmp delay5
+resultsqr:
+	fsqrt
+	jmp delay5
+
+divbyzero:
+	call newline
+	write divbyzerotxt, lgdivbyzero
+	;fld st(0)
+	;frndint
 delay5:
 	nop
 	inc value
