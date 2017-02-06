@@ -77,3 +77,19 @@ flloop:
 	pop bx
 	pop ax
 endm
+
+emptyarr macro arr, lgarr
+local arrloop
+	push ax
+	push bx
+	push dx	
+	mov cx, lgarr
+	mov si, 0
+arrloop:
+	mov arr[si], 0
+	inc si
+	loop arrloop
+	pop dx
+	pop bx
+	pop ax
+endm

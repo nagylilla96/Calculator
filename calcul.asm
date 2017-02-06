@@ -147,6 +147,15 @@ error:
 	jmp delay5
 	
 compare:
+;	mov cx, lgfloat
+;	mov si, 0
+;arrloop:
+;	mov float[si], 0
+;	inc si
+;	loop arrloop
+	emptyarr float, lgfloat
+	emptyarr realpart, lgreal
+	emptyarr fractpart, lgfract
 	mov lgfloat, 0
 	mov lgreal, 0
 	mov lgfract, 0
@@ -157,7 +166,7 @@ compare:
 	jne skip
 incadd:
 	inc addi
-	jmp readfloat
+	jmp startread
 
 skip:
 	cmp subt, 1
@@ -165,31 +174,26 @@ skip:
 	jne skip1
 incsub:
 	inc subt
-	jmp readfloat
+	jmp startread
 skip1:
 	cmp divi, 1
 	je incdiv
 	jne skip2
 incdiv:
 	inc divi
-	jmp readfloat
+	jmp startread
 
 skip2:
 	cmp mult, 1
 	je incmult
-	jne readfloat
+	jne startread
 incmult:
 	inc mult
-	jmp readfloat
+	jmp startread
 laberror:
 	jmp error
 startread:
-	;emptyarr float, lgfloat
-	;emptyarr realpart, lgreal
-	;emptyarr fractpart, lgfract
-	mov lgfloat, 0
-	mov lgreal, 0
-	mov lgfract, 0
+	cmp lgfloat, 0
 	call newline
 	mov si, 0		
 	
@@ -341,7 +345,6 @@ resultsub:
 	fld st(1)
 	ffree st(2)
 	fsub
-	frndint
 	jmp delay5
 resultmul:
 	fmul
@@ -361,8 +364,7 @@ resultsqr:
 	fld st(1)
 	ffree st(2)
 	fsqrt
-	jmp delay5
-	
+	jmp delay5	
 
 divbyzero:
 	call newline
@@ -379,7 +381,7 @@ moredelay1:
 	cmp value, 2500
 	jl delay5
 	
-	;fwait
+	fwait
 	
 	ret
 	
