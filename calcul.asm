@@ -32,9 +32,9 @@ data segment para public 'data'
 	negat db 0
 	real db 0
 	realpart db 15 dup(?)
-	lgreal db 0
+	lgreal dw 0
 	fractpart db 15 dup(?)
-	lgfract db 0
+	lgfract dw 0
 	floatnumber dw 0
 	one dd 1.0
 	ten dd 10.0
@@ -158,8 +158,7 @@ compare:
 incadd:
 	inc addi
 	jmp readfloat
-laberror:
-	jmp error
+
 skip:
 	cmp subt, 1
 	je incsub
@@ -174,14 +173,20 @@ skip1:
 incdiv:
 	inc divi
 	jmp readfloat
+
 skip2:
 	cmp mult, 1
 	je incmult
 	jne readfloat
 incmult:
 	inc mult
-	
+	jmp readfloat
+laberror:
+	jmp error
 startread:
+	;emptyarr float, lgfloat
+	;emptyarr realpart, lgreal
+	;emptyarr fractpart, lgfract
 	mov lgfloat, 0
 	mov lgreal, 0
 	mov lgfract, 0
@@ -223,8 +228,8 @@ contdot:
 	inc si
 	inc di
 	cmp si, lgfloat
-	jg isnotreal
-	jng finddot
+	jg isnotreal 
+	jnge finddot
 isreal:
 	mov real, 1
 	mov di, 0
@@ -232,7 +237,7 @@ isreal:
 fractloop:
 	mov cl, float[si]
 	cmp si, lgfloat
-	je contttt
+	jge contttt ;;changed from jg
 	mov fractpart[di], cl
 	inc lgfract	
 	inc si
@@ -269,7 +274,7 @@ label2:
 	jmp compare
 	
 processnr:
-	mov cl, lgreal
+	mov cx, lgreal
 	mov si, cx
 	dec si
 	fld one
@@ -285,7 +290,7 @@ label1:
 	jmp label2
 nextlabel:
 	mov si, 0
-	mov cl, lgfract
+	mov cx, lgfract
 	fld result
 	fld ten
 	fdivp ST(3), ST(0)
@@ -336,6 +341,7 @@ resultsub:
 	fld st(1)
 	ffree st(2)
 	fsub
+	frndint
 	jmp delay5
 resultmul:
 	fmul
@@ -344,13 +350,6 @@ resultdiv:
 	fld st(1)
 	ffree st(2)	
 	fdiv	
-	fcom zero
-	mov floatnumber, 0
-	fstsw floatnumber
-	cmp floatnumber, 2084
-	je divbyzero
-	fwait	
-	sahf	
 	jmp delay5
 resultsqu:	
 	fld st(1)
@@ -368,9 +367,6 @@ resultsqr:
 divbyzero:
 	call newline
 	write divbyzerotxt, lgdivbyzero
-	;fld st(0)
-	;frndint
-	;fstp result
 delay5:
 	nop
 	inc value
