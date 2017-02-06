@@ -32,6 +32,8 @@ local procloop
 	push bx
 	push cx
 	push dx
+	cmp cx, 0
+	je nextlabel
 procloop:
 	mov bx, 0	
 	checknr realpart[si]

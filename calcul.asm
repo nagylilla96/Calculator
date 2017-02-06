@@ -3,7 +3,7 @@ if 1
 endif
 
 ;;TODO comment it!!!
-;;TODO check why it enters an infinite loop when you enter / instead of .
+;;TODO check why it enters an infinite loop when you enter / instead of . -- done 
 ;;TODO add some response when user enters a number because it's not obvious! (ex: add operation chosen or smth like that)
 
 data segment para public 'data'
@@ -21,10 +21,9 @@ data segment para public 'data'
 	lgtext6 equ $-text6
 	errortxt db "The introduced number is not correct"
 	lgerror equ $-errortxt
-	ui1 db 2
-	value dw 0
-	value1 dw 0	
-	value2 dw 0
+	ui1 db 2 ;;menu option number
+	value dw 0 ;;used for delay
+	value1 dw 0 ;;used for delay
 	float db 15 dup(?)
 	lgfloat dw 0
 	number dw 1
@@ -34,13 +33,16 @@ data segment para public 'data'
 	lgreal db 0
 	fractpart db 15 dup(?)
 	lgfract db 0
-	basenumber dw 0
-	mulnumber dd 0.0
 	floatnumber dw 0
 	one dd 1.0
 	ten dd 10.0
 	result dd 0
-	i dw 0
+	addi db 0
+	subt db 0
+	mult db 0
+	divi db 0
+	squa db 0
+	squar db 0
 data ends
 
 extrn newline:far
@@ -87,23 +89,63 @@ read:
 condition:
 	cmp al, 13
 	je check1
-	jne error
+	jne labelerror
 	
 check1:
 	cmp ui1[0], 31h
 	je addition
-	jne readfloat	
+	cmp ui1[0], 32h
+	je subtraction
+	cmp ui1[0], 33h
+	je multiplication
+	cmp ui1[0], 34h
+	je todiv	
+	cmp ui1[0], 35h
+	je tosquare
+	cmp ui1[0], 36h
+	je tosquareroot
+labelerror:
+	jmp error
+
+todiv:
+	jmp division
+tosquare:
+	jmp square
+tosquareroot:
+	jmp squareroot
+addition:
+	mov addi, 1
+	write text1, lgtext1
+	jmp startread
+subtraction:
+	mov subt, 1
+	write text2, lgtext2
+	jmp startread
+multiplication:
+	mov mult, 1
+	write text3, lgtext3
+	jmp startread
+division:
+	mov divi, 1
+	write text4, lgtext4
+	jmp startread
+square:
+	mov squa, 1
+	write text5, lgtext5
+	jmp startread
+squareroot:
+	mov squar, 1
+	write text6, lgtext6
+	jmp startread
 	
 error: 
 	call newline
 	write errortxt, lgerror	
-
-addition:
-	nop
+	jmp delay5
 	
+startread:
 	call newline
 	mov si, 0
-
 	
 readfloat:
 	mov ah, 7
@@ -165,6 +207,8 @@ deleteminus:
 isnotreal:
 	dec lgreal
 	mov real, 0
+	mov fractpart[0], 30h ;; we need this, othewise: divide by zero
+	mov lgfract, 1
 	jmp processnr	
 negative:
 	mov negat, 1
@@ -210,11 +254,12 @@ beforedelay:
 	je invert
 	jne noinvert
 invert:
-	fld result
-	fsubrp st(1), st(0)
+	fchs
 noinvert:
 	ffree st(2)
 	ffree st(1)
+	fld st(0)
+	frndint
 delay5:
 	nop
 	inc value
@@ -227,7 +272,7 @@ moredelay1:
 	cmp value, 2500
 	jl delay5
 	
-	fwait
+	;fwait
 	
 	ret
 	
