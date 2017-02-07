@@ -1,9 +1,5 @@
 write macro string, lgsir
 local writeloop
-	push ax
-	push bx
-	push cx
-	push dx
 	mov bx, 0
 	mov si,0
 	mov cx, lgsir
@@ -13,10 +9,6 @@ writeloop:
 	int 21h
 	inc si
 	loop writeloop
-	pop dx
-	pop cx
-	pop bx
-	pop ax
 endm
 
 checknr macro nr
@@ -28,10 +20,6 @@ endm
 
 processreal macro realpart
 local procloop
-	push ax
-	push bx
-	push cx
-	push dx
 	cmp cx, 0
 	je nextlabel
 procloop:
@@ -47,17 +35,10 @@ procloop:
 	fadd 
 	dec si
 	loop procloop
-	pop dx
-	pop cx
-	pop bx
-	pop ax
 endm
 
 processfloat macro floatpart
 local flloop
-	push ax
-	push bx
-	push dx	
 	cmp cx, 0
 	je contproc
 flloop:
@@ -73,23 +54,115 @@ flloop:
 	fadd
 	inc si
 	loop flloop
-	pop dx
-	pop bx
-	pop ax
 endm
 
 emptyarr macro arr, lgarr
 local arrloop
-	push ax
-	push bx
-	push dx	
 	mov cx, lgarr
 	mov si, 0
 arrloop:
 	mov arr[si], 0
 	inc si
 	loop arrloop
-	pop dx
-	pop bx
-	pop ax
+endm
+
+realproc macro 
+	mov cx, 10
+	mov si, lganswerreal
+realloop:	
+	fld st(2)
+	fld dividend
+	fld st(3)
+	fmul
+	fld ten
+	fdiv
+	fdiv
+	fist anotherfloat
+	cmp anotherfloat, 0
+	je afterreal
+	fprem
+	fld st(0)
+	frndint
+	fistp floatnumber
+	mov ax, floatnumber
+	add ax, 30h
+	mov answerreal[si], al
+	inc si
+	fld st(3)
+	ffree st(4)
+	fld st(3)
+	ffree st(4)
+	fld st(3)
+	ffree st(4)
+	ffree st(3)
+	fmul
+	fld ten
+	loop realloop
+endm
+
+fractproc macro
+fractionloop:
+	fld ten
+	fld st(2)
+	fld st(2)
+	fmul
+	fst placeholder
+	mov bl, iterator	
+	fprem
+contfractloop:	
+	mov iterator, bl
+	fld st(0)
+	frndint 
+	fistp floatnumber
+	cmp floatnumber, 0
+	je afterfract
+	mov ax, floatnumber
+	add ax, 30h
+	mov answerfract[si], al
+	inc si
+	fld st(3)
+	ffree st(4)
+	fld st(3)
+	ffree st(4)
+	ffree st(3)
+	ffree st(2)
+	fld ten 
+	fmul
+	ffree st(2)
+	inc iterator
+	loop fractionloop
+endm
+
+invreal macro
+invertreal:
+	cmp answerreal[si], 35h
+	jnge nodecrease
+decrease:
+	dec answerreal[si + 1]
+nodecrease:
+	mov bl, answerreal[si]
+	mov newanswerreal[di], bl
+	inc si
+	dec di
+	loop invertreal
+endm
+
+catreal macro
+concatreal:
+	mov bl, newanswerreal[si]
+	mov finalanswer[di], bl
+	inc di
+	inc lgfinalanswer
+	inc si
+	loop concatreal
+endm
+
+catfract macro
+concatfract:
+	mov bl, answerfract[si]
+	mov finalanswer[di], bl
+	inc si
+	inc di
+	inc lgfinalanswer
+	loop concatfract
 endm

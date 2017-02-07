@@ -34,21 +34,37 @@ data segment para public 'data'
 	realpart db 15 dup(?)
 	lgreal dw 0
 	fractpart db 15 dup(?)
+	answerreal db 10 dup(?)
+	lganswerreal dw 0
+	answerfract db 5 dup(?)
+	finalanswer db 15 dup(?)
+	newanswerreal db 10 dup(?)
+	lgnewanswer dw 0
+	lgfinalanswer dw 0
+	lganswerfract dw 0
 	lgfract dw 0
 	floatnumber dw 0
 	one dd 1.0
 	ten dd 10.0
-	result dd 0
-	zero dd 0
+	result dd 0.0
+	zero dd 0.0
 	addi db 0
 	subt db 0
 	mult db 0
 	divi db 0
 	squa db 0
 	squar db 0
+	ezer dw 1000
+	szaz dw 100
+	tiz dw 10
+	dividend dd 1.0
+	iterator db 1
+	placeholder dd 0
+	anotherfloat dw 0
 data ends
 
 extrn newline:far
+extrn delay:far
 code segment para public 'code'
 	
 start proc far
@@ -144,15 +160,9 @@ squareroot:
 error: 
 	call newline
 	write errortxt, lgerror	
-	jmp delay5
+	jmp delaay
 	
 compare:
-;	mov cx, lgfloat
-;	mov si, 0
-;arrloop:
-;	mov float[si], 0
-;	inc si
-;	loop arrloop
 	emptyarr float, lgfloat
 	emptyarr realpart, lgreal
 	emptyarr fractpart, lgfract
@@ -233,7 +243,7 @@ contdot:
 	inc di
 	cmp si, lgfloat
 	jg isnotreal 
-	jnge finddot
+	jng finddot
 isreal:
 	mov real, 1
 	mov di, 0
@@ -255,7 +265,6 @@ deleteminus:
 	inc si	
 	jmp contfind
 isnotreal:
-	;dec lgreal
 	mov real, 0
 	mov fractpart[0], 30h ;; we need this, othewise: divide by zero
 	mov lgfract, 1
@@ -289,7 +298,7 @@ processnr:
 error1:
 	call newline
 	write errortxt, lgerror
-	jmp delay5
+	jmp delaay
 label1:
 	jmp label2
 nextlabel:
@@ -340,49 +349,103 @@ noinvert:
 
 resultadd:
 	fadd
-	jmp delay5
+	jmp reconvert
 resultsub:
 	fld st(1)
 	ffree st(2)
 	fsub
-	jmp delay5
+	jmp reconvert
 resultmul:
 	fmul
-	jmp delay5
+	jmp reconvert
 resultdiv:
 	fld st(1)
 	ffree st(2)	
 	fdiv	
-	jmp delay5
+	jmp reconvert
 resultsqu:	
 	fld st(1)
 	ffree st(2)
 	fld st(0)
 	fmul
-	jmp delay5
+	jmp reconvert
 resultsqr:
 	fld st(1)
 	ffree st(2)
 	fsqrt
-	jmp delay5	
-
+	jmp reconvert	
 divbyzero:
 	call newline
-	write divbyzerotxt, lgdivbyzero
-delay5:
-	nop
-	inc value
-	mov value1, 0
-moredelay1: 
-	nop
-	inc value1
-	cmp value1, 2500
-	jl moredelay1
-	cmp value, 2500
-	jl delay5
+	write divbyzerotxt, lgdivbyzero	
+reconvert:
+	fld st(0)
+	fld st(0)
+	fabs
+	fdiv
+	frndint
+	fistp floatnumber
+	cmp floatnumber, 0FFFFh
+	je negres
+	jne posres
+negres:
+	mov negat, 1
+	fchs
+	jmp cont
+posres:
+	mov negat, 0
+cont:
+	fld ten
+	fld ten
+	realproc
+afterreal:
+	mov lganswerreal, si
+	mov si, lganswerfract
+	mov cx, 10
+	fld st(3)
+	ffree st(4)
+	ffree st(3)
+	ffree st(2)
+	ffree st(1)
+	fld ten
+	fractproc
+afterfract:
+	mov lganswerfract, si
+	dec si
+	inc answerfract[si]
+	mov di, lganswerreal
+	dec di
+	mov si, lganswerreal
+	mov cx, lganswerreal
+	mov si, 0
+	invreal
+	mov bx, lganswerreal
+	mov lgnewanswer, bx
+	mov cx, lgnewanswer
+	mov si, 0
+	mov di, 0
+	cmp negat, 1
+	je addminus
+	jne concatreal
+addminus:
+	mov finalanswer[di], '-'
+	inc di
+	inc lgfinalanswer
+	catreal
+	mov si, 0
+	mov finalanswer[di], '.'
+	inc di
+	inc lgfinalanswer
+	mov cx, lganswerfract
+	catfract
+	call newline
+	write finalanswer, lgfinalanswer
 	
-	fwait
+	mov cx, value
+	mov dx, value1
 	
+delaay:
+	call delay	
+	fwait	
 	ret
 	
 start endp
