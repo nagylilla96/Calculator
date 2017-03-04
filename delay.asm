@@ -1,7 +1,7 @@
 code segment para 'code'
 public delay
 	assume cs:code
-	delay proc far
+	delay proc far;;it's a delay so answer after running program can be shown for a while
 delay5:
 	nop
 	inc cx

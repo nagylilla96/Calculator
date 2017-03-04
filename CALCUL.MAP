@@ -1,10 +1,10 @@
 
  Start  Stop   Length Name               Class
 
- 00000H 00113H 00114H DATA               DATA
- 00120H 0076FH 00650H CODE               CODE
- 00770H 00776H 00007H CODE               CODE
- 00780H 00793H 00014H CODE               CODE
+ 00000H 00117H 00118H DATA               DATA
+ 00120H 007D7H 006B8H CODE               CODE
+ 007E0H 007E6H 00007H CODE               CODE
+ 007F0H 00803H 00014H CODE               CODE
 
 Program entry point at 0012:0000
 Warning: no stack

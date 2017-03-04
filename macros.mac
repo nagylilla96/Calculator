@@ -11,6 +11,16 @@ writeloop:
 	loop writeloop
 endm
 
+emptyarr macro arr, lgarr
+local arrloop
+	mov cx, lgarr
+	mov si, 0
+arrloop:
+	mov arr[si], 0
+	inc si
+	loop arrloop
+endm
+
 checknr macro nr
 	cmp nr, 30h
 	jnge error1
@@ -56,16 +66,6 @@ flloop:
 	loop flloop
 endm
 
-emptyarr macro arr, lgarr
-local arrloop
-	mov cx, lgarr
-	mov si, 0
-arrloop:
-	mov arr[si], 0
-	inc si
-	loop arrloop
-endm
-
 realproc macro 
 	mov cx, 10
 	mov si, lganswerreal
@@ -82,7 +82,6 @@ realloop:
 	je afterreal
 	fprem
 	fld st(0)
-	frndint
 	fistp floatnumber
 	mov ax, floatnumber
 	add ax, 30h
@@ -112,7 +111,6 @@ fractionloop:
 contfractloop:	
 	mov iterator, bl
 	fld st(0)
-	frndint 
 	fistp floatnumber
 	cmp floatnumber, 0
 	je afterfract
@@ -134,20 +132,35 @@ contfractloop:
 endm
 
 invreal macro
+	;cmp cx, 1
+	;jle invrealend
 invertreal:
-	cmp answerreal[si], 35h
-	jnge nodecrease
-decrease:
-	dec answerreal[si + 1]
-nodecrease:
+;	cmp answerreal[si], 35h
+;	jnge nodecrease
+;decrease:
+;	dec answerreal[si + 1]
+;nodecrease:
+;	cmp answerreal[si], 30h
+;	jne skipfirstzero
+;	inc si
+;	dec di
+;skipfirstzero:
 	mov bl, answerreal[si]
 	mov newanswerreal[di], bl
 	inc si
 	dec di
 	loop invertreal
+	;jmp theend
+;invrealend:
+;	mov bl, answerreal[0]
+;	mov newanswerreal[0], bl
+;	mov lgnewanswer, 1
+;theend:
 endm
 
 catreal macro
+	cmp cx, 0
+	je finalcatreal
 concatreal:
 	mov bl, newanswerreal[si]
 	mov finalanswer[di], bl
@@ -155,9 +168,12 @@ concatreal:
 	inc lgfinalanswer
 	inc si
 	loop concatreal
+finalcatreal:
 endm
 
 catfract macro
+	cmp cx, 0
+	je finalcatfract
 concatfract:
 	mov bl, answerfract[si]
 	mov finalanswer[di], bl
@@ -165,4 +181,16 @@ concatfract:
 	inc di
 	inc lgfinalanswer
 	loop concatfract
+finalcatfract:
+endm
+
+finalmacro macro
+loopfinal:
+	cmp answerreal[si], 35h
+	jnge nodecrease1
+decrease1:
+	dec answerreal[si - 1]
+nodecrease1:
+	dec si
+	loop loopfinal
 endm
